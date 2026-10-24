@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4efe6"><title>XO أونلاين</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap">
+<style>
+:root{--bg:#f4efe6;--ink:#1f2430;--mut:#7b7466;--card:#fffaf0;--line:#d9cfbd;--x:#c8553d;--o:#2d6a6a;--win:#f1e2b8;color-scheme:light}
+:root[data-theme=dark]{--bg:#14171f;--ink:#ece7dc;--mut:#8f98a8;--card:#1c212c;--line:#2e3544;--x:#ef7d62;--o:#5cc0b8;--win:#3a3522;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Cairo",system-ui,sans-serif}
+main{max-width:460px;margin:0 auto;padding:26px 18px;display:flex;flex-direction:column;gap:17px}
+h1{margin:0;text-align:center;font-weight:900;font-size:2.2rem}h1 b:first-child{color:var(--x)}h1 b:last-child{color:var(--o)}
+.sub{text-align:center;color:var(--mut);margin:-13px 0 0;font-size:.92rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;display:flex;flex-direction:column;gap:12px}
+button,input{font:inherit;color:inherit}.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:11px 14px;cursor:pointer;font-weight:700;transition:transform .12s}
+.btn:active{transform:scale(.97)}.btn.main{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}input{border:1px solid var(--line);background:transparent;border-radius:12px;padding:11px;text-align:center;letter-spacing:.12em;direction:ltr;min-width:0}
+.row{display:flex;gap:9px}.row>*{flex:1;min-width:0}.note{color:var(--mut);font-size:.8rem;text-align:center;margin:0}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px}.pl{flex:1;text-align:center;padding:8px 4px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700;opacity:.6;min-width:0}
+.pl.on{opacity:1;border-color:currentColor}.pl.X{color:var(--x)}.pl.O{color:var(--o)}.pl small{display:block;color:var(--mut);font-weight:400;font-size:.78rem}
+.code{text-align:center;color:var(--mut);font-size:.9rem}.code b{direction:ltr;display:inline-block;letter-spacing:.25em;color:var(--ink);cursor:pointer}
+#status{text-align:center;font-weight:700;min-height:1.6em}.board{direction:ltr;display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.cell{aspect-ratio:1;border-radius:16px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:grid;place-items:center;padding:14%}
+.cell:disabled{cursor:default}.cell.can:hover{background:var(--win)}.cell.win{background:var(--win)}
+.cell svg{width:100%;height:100%;fill:none;stroke-width:9;stroke-linecap:round}.cell .x{stroke:var(--x)}.cell .o{stroke:var(--o)}
+.cell path,.cell circle{stroke-dasharray:100;stroke-dashoffset:100;animation:d .35s ease forwards}.cell path+path{animation-delay:.15s}
+@keyframes d{to{stroke-dashoffset:0}}.hide{display:none!important}
+.section-title{font-weight:900;margin:4px 0 0}.room-list,.leader-list{display:flex;flex-direction:column;gap:8px}
+.room{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:9px 10px}.room .rinfo{flex:1;font-size:.82rem}.room small{display:block;color:var(--mut)}.room code{font-weight:900;letter-spacing:.1em}.room button{padding:6px 10px;font-size:.8rem}
+.rank{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;background:var(--bg);font-size:.85rem}.rank span:first-child{font-weight:900;color:var(--o)}.rank .rname{flex:1}.muted{color:var(--mut);font-size:.8rem}
+.toprow{display:flex;gap:8px;align-items:center}.toprow>*{flex:1}.tiny{font-size:.8rem;padding:7px 10px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translate(-50%,15px);opacity:0;transition:.2s;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.85rem;max-width:90%;text-align:center;z-index:5;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:360px){main{padding:20px 12px}.card{padding:13px}.cell{border-radius:12px}.pl{font-size:.85rem}}
+</style></head>
+<body><main>
+<h1><b>X</b> <b>O</b></h1><p class="sub">لعبة واحد ضد واحد أونلاين</p>
+<section id="menu" class="card">
+<label for="nameIn" class="note">اسم اللاعب</label><input id="nameIn" maxlength="18" placeholder="اكتب اسمك" style="direction:rtl;letter-spacing:0">
+<button class="btn main" id="create">إنشاء غرفة خاصة</button>
+<div class="row"><input id="codeIn" maxlength="6" placeholder="كود الغرفة" aria-label="كود الغرفة"><button class="btn" id="join">انضمام</button></div>
+<button class="btn" id="quick">العب مع لاعب عشوائي</button><button class="btn" id="createPublic">إنشاء غرفة عامة</button>
+<p class="note" id="menuNote">اعمل غرفة وابعت الكود لصاحبك. كل واحد يقدر يكون على شبكة مختلفة.</p>
+</section>
+<section id="game" class="hide"><div class="card">
+<div class="toprow"><div class="code" id="codeBox"></div><button class="btn tiny" id="copy">نسخ الكود</button></div>
+<div class="bar"><div class="pl X" id="pX">X<small>بانتظار لاعب</small></div><div class="pl O" id="pO">O<small>بانتظار لاعب</small></div></div>
+<div id="status">في انتظار الخصم…</div><div class="board" id="board"></div>
+<div class="row"><button class="btn main hide" id="again">جولة جديدة</button><button class="btn" id="leave">خروج</button></div>
+</div></section>
+<section class="card" id="publicPanel"><div class="toprow"><strong class="section-title">الغرف العامة</strong><button class="btn tiny" id="refresh">تحديث</button></div><div id="rooms" class="room-list"><p class="note">جاري الاتصال بالسيرفر…</p></div>
+<strong class="section-title">🏆 أفضل اللاعبين</strong><div id="leaderboard" class="leader-list"><p class="note">لا توجد نتائج حتى الآن</p></div></section>
+<p class="note">XO أونلاين • بدون Firebase</p></main><div class="toast" id="toast"></div>
+<script src="/socket.io/socket.io.js"></script><script>
+const $=s=>document.querySelector(s), W=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const XS='<svg viewBox="0 0 100 100" class="x"><path d="M20 20L80 80" pathLength="100"/><path d="M80 20L20 80" pathLength="100"/></svg>';
+const OS='<svg viewBox="0 0 100 100" class="o"><circle cx="50" cy="50" r="31" pathLength="100"/></svg>';
+const board=$('#board');board.innerHTML=Array.from({length:9},(_,i)=>'<button class="cell" data-i="'+i+'" aria-label="خانة '+(i+1)+'"></button>').join('');
+let socket=io(), roomCode=null, myMark=null, gameState=null, toastTimer=null;
+function name(){let n=$('#nameIn').value.trim();if(!n){$('#nameIn').focus();toast('اكتب اسمك الأول.');return null}return n.slice(0,18)}
+function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2600)}
+function safe(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showGame(code){roomCode=code;$('#codeBox').innerHTML='كود الغرفة: <b>'+safe(code)+'</b>';$('#menu').classList.add('hide');$('#publicPanel').classList.add('hide');$('#game').classList.remove('hide');window.scrollTo({top:0,behavior:'smooth'})}
+function showMenu(){socket.emit('leave');roomCode=null;gameState=null;myMark=null;$('#game').classList.add('hide');$('#menu').classList.remove('hide');$('#publicPanel').classList.remove('hide')}
+function render(s){gameState=s;if(s.code!==roomCode)showGame(s.code);let mine=s.players.find(p=>p.name===$('#nameIn').value.trim());if(mine)myMark=mine.mark;
+$('#pX').innerHTML='X · '+safe((s.players.find(p=>p.mark==='X')||{}).name||'بانتظار لاعب')+'<small>'+(s.turn==='X'&&s.status==='playing'?'دوره الآن':'')+'</small>';
+$('#pO').innerHTML='O · '+safe((s.players.find(p=>p.mark==='O')||{}).name||'بانتظار لاعب')+'<small>'+(s.turn==='O'&&s.status==='playing'?'دوره الآن':'')+'</small>';
+$('#pX').classList.toggle('on',s.status==='playing'&&s.turn==='X');$('#pO').classList.toggle('on',s.status==='playing'&&s.turn==='O');
+$('#status').textContent=s.message||'';
+board.querySelectorAll('.cell').forEach((c,i)=>{let m=s.board[i];c.innerHTML=m==='X'?XS:m==='O'?OS:'';c.disabled=!!m||s.status!=='playing'||s.turn!==myMark;c.classList.toggle('can',!m&&s.status==='playing'&&s.turn===myMark);c.classList.remove('win')});
+let line=[];for(let l of W){if(s.board[l[0]]&&s.board[l[0]]===s.board[l[1]]&&s.board[l[1]]===s.board[l[2]])line=l}line.forEach(i=>board.querySelector('[data-i="'+i+'"]').classList.add('win'));
+$('#again').classList.toggle('hide',s.status!=='finished');
+}
+board.onclick=e=>{let c=e.target.closest('.cell');if(c&&gameState)socket.emit('move',{index:+c.dataset.i})};
+$('#create').onclick=()=>{let n=name();if(n)socket.emit('create',{name:n,type:'private'})};
+$('#createPublic').onclick=()=>{let n=name();if(n)socket.emit('create',{name:n,type:'public'})};
+$('#quick').onclick=()=>{let n=name();if(n)socket.emit('quick',{name:n})};
+$('#join').onclick=()=>{let n=name(),c=$('#codeIn').value.trim().toUpperCase();if(!n)return;if(!c)return toast('اكتب كود الغرفة.');socket.emit('join',{name:n,code:c})};
+$('#codeIn').onkeydown=e=>{if(e.key==='Enter')$('#join').click()};
+$('#leave').onclick=showMenu;$('#again').onclick=()=>socket.emit('again');
+$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(roomCode);toast('تم نسخ الكود')}catch(e){toast('كود الغرفة: '+roomCode)}};
+$('#refresh').onclick=()=>toast('قائمة الغرف تتحدث تلقائيًا');
+socket.on('connect',()=>{$('#menuNote').textContent='متصل بالسيرفر. أنشئ غرفة وشارك الكود مع صاحبك.'});
+socket.on('disconnect',()=>{$('#menuNote').textContent='الاتصال بالسيرفر انقطع؛ جاري إعادة الاتصال.'});
+socket.on('created',d=>{myMark='X';showGame(d.code);toast('الغرفة اتعملت. ابعت الكود لصاحبك!')});
+socket.on('joined',d=>{showGame(d.code);toast('دخلت الغرفة بنجاح')});
+socket.on('state',render);socket.on('notice',toast);socket.on('left',()=>{});
+socket.on('public-rooms',list=>{let el=$('#rooms');if(!list.length){el.innerHTML='<p class="note">مفيش غرف عامة متاحة حاليًا.</p>';return}
+el.innerHTML=list.map(r=>'<div class="room"><div class="rinfo">غرفة عامة<small>'+r.players+'/2 لاعبين</small></div><code>'+safe(r.code)+'</code><button class="btn" data-code="'+safe(r.code)+'">انضمام</button></div>').join('');
+el.querySelectorAll('[data-code]').forEach(b=>b.onclick=()=>{let n=name();if(n)socket.emit('join-public',{name:n,code:b.dataset.code})})});
+socket.on('leaderboard',list=>{let el=$('#leaderboard');if(!list.length){el.innerHTML='<p class="note">لا توجد نتائج حتى الآن</p>';return}
+el.innerHTML=list.map((p,i)=>'<div class="rank"><span>#'+(i+1)+'</span><span class="rname">'+safe(p.name)+'</span><span>🏆 '+p.wins+'</span><span class="muted">خسارة '+p.losses+'</span></div>').join('')});
+</script></body></html>
